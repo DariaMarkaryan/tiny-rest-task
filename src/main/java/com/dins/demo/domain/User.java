@@ -1,10 +1,12 @@
 package com.dins.demo.domain;
 
-import com.dins.demo.domain.PhoneBook;
+import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
+@Data
 @Table(name = "user")
 public class User {
     @Id
@@ -13,6 +15,6 @@ public class User {
 
     private String name;
 
-    @OneToOne
-    private PhoneBook phoneBook;
+    @OneToMany
+    private List<Contact> contacts;
 }

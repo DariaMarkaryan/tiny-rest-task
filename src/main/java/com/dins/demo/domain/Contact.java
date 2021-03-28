@@ -10,15 +10,13 @@ import javax.persistence.Table;
 @Data
 @Table(name = "contact")
 public class Contact {
+    @Id
+    private Integer id;
 
     private String name;
 
     private String phoneNumber;
 
     @ManyToOne
-    PhoneBook phoneBook;
-
-    @Id
-    private Long id;
-
+    User user;
 }
