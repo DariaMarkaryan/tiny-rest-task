@@ -1,22 +1,24 @@
 package com.dins.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import javax.validation.constraints.Digits;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 @Entity
 @Data
-@Table(name = "contact")
 public class Contact {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String name;
+    private String contactname;
 
-    private String phoneNumber;
+    private String phone;
 
     @ManyToOne
+    @JoinColumn(name="user_id", nullable = false)
+    @JsonIgnore
     User user;
 }
