@@ -4,71 +4,65 @@ import com.dins.demo.data.UserRepository;
 import com.dins.demo.domain.Contact;
 import com.dins.demo.domain.User;
 import com.dins.demo.exceptions.UserNotFoundException;
+import com.dins.demo.services.UserService;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping(produces = "application/json")
-    public Iterable<User> allUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> getAllUsers(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize
+    ) throws NotFoundException {
+        List<User> res = userService.getAllUsers(pageNo, pageSize);
+        return new ResponseEntity<List<User>>(res,  HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}", produces = "application/json")
-    public User getUser(@PathVariable("id") int id) throws UserNotFoundException {
-        try {
-            return userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("There is no us3r with id =" + id)
-            );
-        } catch (UserNotFoundException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exception.getMessage());
-        }
+    public User getUserById(@PathVariable("id") int id) throws NotFoundException {
+            return userService.getUserById(id);
+    }
+
+    @GetMapping(value = "/byname/{name}", produces = "application/json")
+    public List<User> getUserByName(@PathVariable(value = "name") String name) throws NotFoundException{
+        return userService.getUsersByMatchesName(name);
     }
 
     @GetMapping(path = "/{id}/all", produces = "application/json")
-    public Iterable<Contact> getAllContacts(@PathVariable("id") int id) throws UserNotFoundException {
-        try {
-            User user = userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("There is no us3r with id =" + id)
-            );
-            return user.getPhoneBook();
-
-        } catch (UserNotFoundException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exception.getMessage());
-        }
+    public ResponseEntity<List<Contact>> getAllContacts(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @PathVariable("id") int id)
+            throws NotFoundException {
+        List<Contact> res = userService.getAllContacts(pageNo, pageSize, id);
+        return new ResponseEntity<List<Contact>>(res,  HttpStatus.OK);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void postUser(@RequestBody User user) {
-        userRepository.save(user);
+    public void postUser(@RequestBody User user) throws NotFoundException {
+         userService.createUser(user);
     }
 
     @PutMapping("/{id}")
-    public void updateUser(@PathVariable("id") int id, @RequestBody User user) {
-        try {
-            User old = userRepository.findById(id).orElseThrow(
-                    () -> new UserNotFoundException("There is no us3r with id =" + id)
-            );
-            old.setName(user.getName());
-        } catch (UserNotFoundException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, exception.getMessage());
-        }
+    public void updateUser(@PathVariable("id") int id, @RequestBody User user) throws NotFoundException {
+        userService.updateUser(id, user);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable("id") int id) {
-        userRepository.deleteById(id);
+    public void deleteUser(@PathVariable("id") int id) throws NotFoundException {
+        userService.deleteUser(id);
     }
 }

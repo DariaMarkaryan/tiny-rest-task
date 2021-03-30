@@ -1,8 +1,8 @@
 package com.dins.demo.data;
 
 import com.dins.demo.domain.Contact;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface ContactRepository
-        extends CrudRepository<Contact, Integer> {
+        extends PagingAndSortingRepository<Contact, Integer> {
 }
