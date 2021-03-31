@@ -1,9 +1,10 @@
 package com.dins.demo;
 
+import com.dins.demo.entites.ContactModel;
 import com.dins.demo.entites.User;
 import com.dins.demo.entites.UserModel;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,7 @@ public class UserControllerTest {
 
 
     @Test
-    void testGetAllUsers() {
+    public void testGetAllUsers() {
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
@@ -42,21 +43,21 @@ public class UserControllerTest {
     }
 
     @Test
-    void testGetUserById() {
+    public void testGetUserById() {
         User user = restTemplate.getForObject(getRootUrl() + "/user/2", User.class);
         System.out.println(user.getName());
         Assertions.assertEquals(user.getName(), "Masha");
     }
 
     @Test
-    void testGetUsersByName() {
+    public void testGetUsersByName() {
         UserModel user = restTemplate.getForObject(getRootUrl() + "/user/byname/asha", UserModel.class);
         System.out.println(user.getName());
         assertNotNull(user);
     }
 
     @Test
-    void testAddUser() {
+    public void testAddUser() {
         UserModel user = new UserModel();
         user.setName("Grigory");
         user.setId(1);
@@ -65,7 +66,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testUpdateUser() {
+    public void testUpdateUser() {
         int id = 2;
         UserModel user = restTemplate.getForObject(getRootUrl() + "/user/" + id, UserModel.class);
         user.setName("Maria");
@@ -76,7 +77,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testDeleteUser() throws Exception {
+    public void testDeleteUser() throws Exception {
         int id = 3;//Удостоверьтесь, что вы ещё не удаили эту запись
         UserModel user = restTemplate.getForObject(getRootUrl() + "/user/" + id, UserModel.class);
         assertNotNull(user);
@@ -88,11 +89,11 @@ public class UserControllerTest {
         }
     }
 
-//    @Test
-//    void getPhonebook() {
-//        int id = 2;
-//        ContactModel phonebook = restTemplate.getForObject(getRootUrl() + "/user/" + id + "/phonebook", ContactModel.class);
-//        assertNotNull(phonebook);
-//    }
+    @Test
+    public void getPhonebook() {
+        int id = 2;
+        ContactModel phonebook = restTemplate.getForObject(getRootUrl() + "/user/" + id + "/phonebook", ContactModel.class);
+        assertNotNull(phonebook);
+    }
 }
 
