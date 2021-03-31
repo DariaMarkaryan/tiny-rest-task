@@ -3,18 +3,31 @@ package com.dins.demo;
 import com.dins.demo.entites.ContactModel;
 import com.dins.demo.entites.User;
 import com.dins.demo.entites.UserModel;
+import com.dins.demo.repos.UserRepository;
+import com.dins.demo.services.UserService;
+import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 
 @RunWith(SpringRunner.class)
@@ -26,13 +39,26 @@ public class UserControllerTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private UserService userService;
+
     private String getRootUrl() {
         return "http://localhost:" + port;
     }
 
+    @MockBean
+    private UserRepository userRepository;
+
+    @Before
+    public void init() {
+        User user = new User();
+        user.setName("Ekaterina");
+    when(userRepository.findById(1)).thenReturn(Optional.of(user));
+    }
 
     @Test
     public void testGetAllUsers() {
+
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
@@ -43,10 +69,15 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testGetUserById() {
-        User user = restTemplate.getForObject(getRootUrl() + "/user/2", User.class);
-        System.out.println(user.getName());
-        Assertions.assertEquals(user.getName(), "Masha");
+    public void testGetUserById() throws JSONException {
+//        User user = restTemplate.getForObject(getRootUrl() + "/user/2", User.class);
+//        System.out.println(user.getName());
+//        Assertions.assertEquals(user.getName(), "Masha");
+    String expected ="{name:\"Ekaterina\"}";
+        ResponseEntity<String> response = restTemplate.getForEntity("/user/1", String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        JSONAssert.assertEquals(expected, response.getBody(), false);
+        verify(userRepository, times(1)).findById(1);
     }
 
     @Test
@@ -59,16 +90,17 @@ public class UserControllerTest {
     @Test
     public void testAddUser() {
         UserModel user = new UserModel();
+        int then = userService.getAllUsers(Pageable.unpaged()).getSize();
         user.setName("Grigory");
-        user.setId(1);
         ResponseEntity<UserModel> postResponse = restTemplate.postForEntity(getRootUrl() + "/user", user, UserModel.class);
-        assertNotNull(postResponse);
+        int now = userService.getAllUsers(Pageable.unpaged()).getSize();
+        assertEquals(then, now - 1);
     }
 
     @Test
     public void testUpdateUser() {
         int id = 2;
-        UserModel user = restTemplate.getForObject(getRootUrl() + "/user/" + id, UserModel.class);
+        User user = restTemplate.getForObject(getRootUrl() + "/user/" + id, User.class);
         user.setName("Maria");
         restTemplate.put(getRootUrl() + "/user/" + id, user);
 
@@ -78,7 +110,7 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUser() throws Exception {
-        int id = 3;//Удостоверьтесь, что вы ещё не удаили эту запись
+        int id = 33;//Удостоверьтесь, что вы ещё не удаили эту запись
         UserModel user = restTemplate.getForObject(getRootUrl() + "/user/" + id, UserModel.class);
         assertNotNull(user);
         restTemplate.delete(getRootUrl() + "/user/" + id);
