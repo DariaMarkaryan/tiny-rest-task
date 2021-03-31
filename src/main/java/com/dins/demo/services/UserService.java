@@ -1,10 +1,8 @@
 package com.dins.demo.services;
 
-import com.dins.demo.repos.UserRepository;
 import com.dins.demo.entites.Contact;
 import com.dins.demo.entites.User;
-import com.dins.demo.exceptions.UserNotFoundException;
-import javassist.NotFoundException;
+import com.dins.demo.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,7 +26,7 @@ public class UserService {
         }
     }
 
-    public User getUserById(int id)  {
+    public User getUserById(int id) {
         Optional<User> user = userRepository.findById(id);
         return user.orElse(null);
     }
@@ -48,7 +46,7 @@ public class UserService {
 
     public void updateUser(int id, User user) {
         Optional<User> foundUser = userRepository.findById(id);
-        if(foundUser.isPresent())
+        if (foundUser.isPresent())
             foundUser.ifPresent(value -> value.setName(user.getName()));
     }
 

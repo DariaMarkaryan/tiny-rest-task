@@ -48,7 +48,7 @@ public class UserController {
     @GetMapping("/all")
     public ResponseEntity<PagedModel<UserModel>> getAllUsers(Pageable pageable) {
         Page<User> page = userService.getAllUsers(pageable);
-        if (page!=null) {
+        if (page != null) {
             PagedModel<UserModel> res = pagedResourcesAssembler
                     .toModel(page, userModelAssembler);
             return new ResponseEntity<>(res, HttpStatus.OK);
@@ -86,7 +86,7 @@ public class UserController {
         User user = userService.getUserById(id);
         if (user != null) {
             Page<Contact> page = userService.getAllContacts(user);
-            if (page!=null) {
+            if (page != null) {
                 PagedModel<ContactModel> res = contactPagedResourcesAssembler
                         .toModel(page, contactAssembler);
                 return new ResponseEntity<>(res, HttpStatus.OK);
@@ -104,7 +104,7 @@ public class UserController {
     @PutMapping("/{id}")
     public void updateUser(@PathVariable("id") int id,
                            @RequestBody User user) {
-        if (userService.getUserById(id)!=null)
+        if (userService.getUserById(id) != null)
             userService.updateUser(id, user);
     }
 

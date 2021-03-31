@@ -6,8 +6,6 @@ import com.dins.demo.web.UserController;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 @Component
 public class ContactAssembler
         extends RepresentationModelAssemblerSupport<Contact, ContactModel> {

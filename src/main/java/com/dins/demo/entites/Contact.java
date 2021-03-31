@@ -20,7 +20,7 @@ public class Contact extends RepresentationModel<Contact> {
     private String phone;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     User user;
 }

@@ -1,8 +1,8 @@
 package com.dins.demo.assemblers;
 
 import com.dins.demo.entites.User;
-import com.dins.demo.web.UserController;
 import com.dins.demo.entites.UserModel;
+import com.dins.demo.web.UserController;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 

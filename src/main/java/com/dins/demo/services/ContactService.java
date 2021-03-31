@@ -1,9 +1,7 @@
 package com.dins.demo.services;
 
-import com.dins.demo.repos.ContactRepository;
 import com.dins.demo.entites.Contact;
-import com.dins.demo.exceptions.ContactNotFoundException;
-import javassist.NotFoundException;
+import com.dins.demo.repos.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,6 @@ package com.dins.demo.web;
 
 import com.dins.demo.entites.Contact;
 import com.dins.demo.services.ContactService;
-import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,7 @@ public class ContactController {
     @GetMapping(path = "/{contactId}", produces = "application/json")
     public ResponseEntity<Contact> getContactById(@PathVariable("contactId") int id) {
         Contact contact = contactService.getContact(id);
-        if(contact != null){
+        if (contact != null) {
             return new ResponseEntity<>(contact, HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

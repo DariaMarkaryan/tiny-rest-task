@@ -1,6 +1,7 @@
 package com.dins.demo.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class User extends RepresentationModel<User> {
     @Id
