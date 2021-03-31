@@ -1,7 +1,9 @@
-package com.dins.demo.domain;
+package com.dins.demo.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Data
-public class User {
+@NoArgsConstructor
+public class User extends RepresentationModel<User> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

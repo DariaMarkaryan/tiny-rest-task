@@ -1,18 +1,12 @@
-package com.dins.demo.controllers;
+package com.dins.demo.web;
 
-import com.dins.demo.data.ContactRepository;
-import com.dins.demo.domain.Contact;
-import com.dins.demo.domain.User;
-import com.dins.demo.exceptions.ContactNotFoundException;
+import com.dins.demo.entites.Contact;
 import com.dins.demo.services.ContactService;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/contact")
@@ -22,8 +16,13 @@ public class ContactController {
     private ContactService contactService;
 
     @GetMapping(path = "/{contactId}", produces = "application/json")
-    public Contact getContact(@PathVariable("contactId") int id) throws NotFoundException {
-        return contactService.getContact(id);
+    public ResponseEntity<Contact> getContactById(@PathVariable("contactId") int id) {
+        Contact contact = contactService.getContact(id);
+        if(contact != null){
+            return new ResponseEntity<>(contact, HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
     }
 
     @PostMapping
@@ -34,13 +33,14 @@ public class ContactController {
 
     @PutMapping(path = "/{contactId}")
     public void updateContact(@PathVariable("contactId") int id,
-                              @RequestBody Contact contact) throws NotFoundException {
-       contactService.updateContact(id, contact);
+                              @RequestBody Contact contact) {
+        if (contactService.getContact(id) != null)
+            contactService.updateContact(id, contact);
     }
 
     @DeleteMapping(path = "/{contactId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteContact(@PathVariable("contactId") int id) throws NotFoundException {
+    public void deleteContact(@PathVariable("contactId") int id) {
         contactService.deleteContact(id);
     }
 

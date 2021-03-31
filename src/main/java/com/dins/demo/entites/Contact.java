@@ -1,14 +1,16 @@
-package com.dins.demo.domain;
+package com.dins.demo.entites;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import javax.validation.constraints.Digits;
+import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
+
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Data
-public class Contact {
+@NoArgsConstructor
+public class Contact extends RepresentationModel<Contact> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

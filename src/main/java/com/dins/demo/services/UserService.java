@@ -1,16 +1,16 @@
 package com.dins.demo.services;
 
-import com.dins.demo.data.UserRepository;
-import com.dins.demo.domain.Contact;
-import com.dins.demo.domain.User;
+import com.dins.demo.repos.UserRepository;
+import com.dins.demo.entites.Contact;
+import com.dins.demo.entites.User;
 import com.dins.demo.exceptions.UserNotFoundException;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,63 +19,50 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> getAllUsers(Integer pgNo, Integer pgSz) throws NotFoundException {
-        Pageable paging = PageRequest.of(pgNo, pgSz);
-        Page<User> pageRes = userRepository.findAll(paging);
+    public Page<User> getAllUsers(Pageable pageable) {
+        Page<User> pageRes = userRepository.findAll(pageable);
         if (pageRes.hasContent()) {
-            return pageRes.getContent();
+            return pageRes;
         } else {
-            throw new UserNotFoundException("There is empty");
+            return null;
         }
     }
 
-    public User getUserById(int id) throws NotFoundException {
+    public User getUserById(int id)  {
         Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            return user.get();
-        } else {
-            throw new UserNotFoundException("There is no user with id = " + id);
-        }
+        return user.orElse(null);
     }
 
-    public List<User> getUsersByMatchesName(String name) throws UserNotFoundException {
-        List<User> res = userRepository.findByNameContains(name);
-        if(res != null){
+    public Page<User> getUsersByMatchesName(String name, Pageable pageable) {
+        Page<User> res = userRepository.findByNameContains(name, pageable);
+        if (res.hasContent()) {
             return res;
         } else {
-           throw new UserNotFoundException("There's no suitable user's name");
+            return null;
         }
     }
 
-    public void createUser(User user) throws NotFoundException {
+    public void createUser(User user) {
         userRepository.save(user);
     }
 
-    public void updateUser(int id, User user) throws NotFoundException {
+    public void updateUser(int id, User user) {
         Optional<User> foundUser = userRepository.findById(id);
-        foundUser.ifPresent(value -> value.setName(user.getName()));
+        if(foundUser.isPresent())
+            foundUser.ifPresent(value -> value.setName(user.getName()));
     }
 
-    public void deleteUser(int userId) throws NotFoundException {
-        if (userRepository.findById(userId).isPresent()) {
+    public void deleteUser(int userId) {
+        if (userRepository.findById(userId).isPresent())
             userRepository.deleteById(userId);
-        } else {
-            throw new UserNotFoundException("There is already no users like that");
-        }
     }
 
-    public List<Contact> getAllContacts(int pageNo, int pageSize, int id) throws UserNotFoundException {
-        Optional<User> usr = userRepository.findById(id);
-        if (usr.isPresent()) {
-            Pageable paging = PageRequest.of(pageNo, pageSize);
-            Page<Contact> contactsPage = new PageImpl<>(usr.get().getPhoneBook());
-            if (contactsPage.hasContent()) {
-                return contactsPage.getContent();
-            } else {
-                return new ArrayList<Contact>();
-            }
+    public Page<Contact> getAllContacts(User usr) {
+        Page<Contact> contactsPage = new PageImpl<>(usr.getPhoneBook());
+        if (contactsPage.hasContent()) {
+            return contactsPage;
         } else {
-            throw new UserNotFoundException("There is no user with id = " + id);
+            return null;
         }
     }
 }
