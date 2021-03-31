@@ -12,7 +12,7 @@
 
 ---
 
-## how to start
+## How to start
 
 1. Clone the repo
 
@@ -26,13 +26,12 @@ open application.properties,
 
 change spring.datasource.username and spring.datasource.password and url to yours database
 
-4. Build and run the app with your favorite IDE or with maven:
-
-The app will start running at http://localhost:8080.
+4. Build and run the app with your favorite IDE or with maven. The app will start running at http://localhost:8080.
 
 ---
-The app defines following CRUD APIs:
+## The app defines following CRUD APIs:
 
+```
 GET: 
   /user/all
   /user/{id}
@@ -51,3 +50,4 @@ PUT:
 :DELETE 
 /user/{id}
 /contact/{contactId}
+```
