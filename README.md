@@ -33,24 +33,21 @@ The app will start running at http://localhost:8080.
 ---
 The app defines following CRUD APIs:
 
-*GET 
+GET: 
   /user/all
   /user/{id}
   /user/byname/{name}
   /user/{id}/phonebook
   /contact/{contactId}
 
-*POST 
+POST: 
   /user
   /contact
-  
-*GET 
-  /contact/{contactId}
 
-*PUT 
+PUT: 
   /user/{id}
   /contact/{contactId}
 
-*DELETE 
+:DELETE 
 /user/{id}
 /contact/{contactId}
