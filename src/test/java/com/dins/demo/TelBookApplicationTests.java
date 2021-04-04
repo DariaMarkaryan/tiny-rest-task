@@ -22,14 +22,4 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class TelBookApplicationTests {
 
-//    private final int port = 8080;
-//
-//    @Test
-//    public void getUser() throws Exception {
-//        Traverson traverson =
-//                new Traverson(new URI("http://localhost:" + this.port + "/user/1"), MediaTypes.HAL_JSON);
-//        String name = traverson.follow("self").toObject("$.name");
-//        Assertions.assertEquals(name, "Dasha");
-//    }
-
 }
