@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS contact (
     contactname varchar(25) NOT NULL,
     phone varchar(25) NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user(id)
     );

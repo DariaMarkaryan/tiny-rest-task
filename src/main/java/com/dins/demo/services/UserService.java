@@ -2,11 +2,13 @@ package com.dins.demo.services;
 
 import com.dins.demo.entites.Contact;
 import com.dins.demo.entites.User;
+import com.dins.demo.exceptions.UserNotFoundException;
 import com.dins.demo.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -40,14 +42,17 @@ public class UserService {
         }
     }
 
-    public void createUser(User user) {
-        userRepository.save(user);
+    public User createUser(User user) {
+        return userRepository.save(user);
     }
 
-    public void updateUser(int id, User user) {
-        Optional<User> foundUser = userRepository.findById(id);
-        if (foundUser.isPresent())
-            foundUser.ifPresent(value -> value.setName(user.getName()));
+    public ResponseEntity<User> updateUser(int id, User user)  {
+        Optional<User> p = userRepository.findById(id);
+        if (p.isEmpty())
+            return (ResponseEntity<User>) ResponseEntity.notFound();
+        User old = p.get();
+        old.setName(user.getName());
+        return ResponseEntity.ok().body(userRepository.save(old));
     }
 
     public void deleteUser(int userId) {

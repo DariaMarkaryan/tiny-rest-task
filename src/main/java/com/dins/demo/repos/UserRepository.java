@@ -5,8 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
-@RepositoryRestResource
+@Repository
 public interface UserRepository
         extends PagingAndSortingRepository<User, Integer> {
     Page<User> findByNameContains(String name, Pageable pageable);
