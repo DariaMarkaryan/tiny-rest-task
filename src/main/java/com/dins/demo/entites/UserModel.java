@@ -7,6 +7,5 @@ import org.springframework.hateoas.RepresentationModel;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class UserModel extends RepresentationModel<UserModel> {
-    private int id;
     private String name;
 }

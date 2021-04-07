@@ -27,8 +27,13 @@ public class UserAssembler
                 methodOn(UserController.class)
                         .getAllContacts(entity.getId()))
                 .withRel("phonebook"));
-        model.setId(entity.getId());
         model.setName(entity.getName());
         return model;
+    }
+
+    public User fromModelToUser(UserModel model) {
+        User user = new User();
+        user.setName(model.getName());
+        return user;
     }
 }

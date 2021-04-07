@@ -1,6 +1,8 @@
 package com.dins.demo.web;
 
+import com.dins.demo.assemblers.ContactAssembler;
 import com.dins.demo.entites.Contact;
+import com.dins.demo.entites.ContactModel;
 import com.dins.demo.services.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,9 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
+    @Autowired
+    private ContactAssembler contactAssembler;
+
     @GetMapping(path = "/{contactId}", produces = "application/json")
     public ResponseEntity<Contact> getContactById(@PathVariable("contactId") int id) {
         Contact contact = contactService.getContact(id);
@@ -26,16 +31,20 @@ public class ContactController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void postContact(@RequestBody Contact contact) {
-        contactService.createContact(contact);
+    public ResponseEntity<Contact> postContact(@RequestBody ContactModel contact) {
+        Contact saved = contactService.createContact(contactAssembler.getContactFromContactModel(contact));
+        return ResponseEntity.status(201).body(saved);
     }
 
     @PutMapping(path = "/{contactId}")
-    public void updateContact(@PathVariable("contactId") int id,
-                              @RequestBody Contact contact) {
-        if (contactService.getContact(id) != null)
-            contactService.updateContact(id, contact);
+    public ResponseEntity<Contact> updateContact(@PathVariable("contactId") int id,
+                                                 @RequestBody ContactModel contact) {
+        return contactService.updateContact(id, contact);
     }
+
+//    public ResponseEntity<User> updateUser(@PathVariable("id") int id,
+//                                           @RequestBody @Valid User user) throws UserNotFoundException {
+//        return userService.updateUser(id, user);
 
     @DeleteMapping(path = "/{contactId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

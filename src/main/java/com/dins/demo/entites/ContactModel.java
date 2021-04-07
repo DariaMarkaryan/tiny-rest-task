@@ -7,8 +7,7 @@ import org.springframework.hateoas.RepresentationModel;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class ContactModel extends RepresentationModel<ContactModel> {
-    private int id;
-    private User user;
+    private int user_id;
     private String contactname;
     private String phone;
 }

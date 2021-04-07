@@ -18,13 +18,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
-import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -55,7 +52,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping(path = "/all")
+    @GetMapping(path = "/all", produces = "application/json")
     public ResponseEntity<PagedModel<UserModel>> getAllUsers(Pageable pageable) {
         Page<User> page = userService.getAllUsers(pageable);
         if (page != null) {
@@ -91,7 +88,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(path = "/{id}/phonebook")
+    @GetMapping(path = "/{id}/phonebook", produces = "application/json")
     public ResponseEntity<PagedModel<ContactModel>> getAllContacts(@PathVariable("id") int id) {
         User user = userService.getUserById(id);
         if (user != null) {
@@ -107,22 +104,20 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<User> postUser(@RequestBody User user) {
-        User saved = userService.createUser(user);
+    public ResponseEntity<User> postUser(@RequestBody UserModel user) {
+        User saved = userService.createUser(userModelAssembler.fromModelToUser(user));
         return ResponseEntity.status(201).body(saved);
     }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<User> updateUser(@PathVariable("id") int id,
-                           @RequestBody @Valid User user) throws UserNotFoundException {
+                                           @RequestBody @Valid User user) throws UserNotFoundException {
         return userService.updateUser(id, user);
 
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable("id") int id) {
-        User user = userService.getUserById(id);
-        if (user != null)
-            userService.deleteUser(id);
-    }
+    public ResponseEntity.BodyBuilder deleteUser(@PathVariable("id") int id) {
+        return userService.deleteUser(id);
+     }
 }
