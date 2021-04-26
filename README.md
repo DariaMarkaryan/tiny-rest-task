@@ -21,21 +21,21 @@ change spring.datasource.username and spring.datasource.password and url to your
 
 ```
 GET: 
-  /user/all
-  /user/{id}
-  /user/byname/{name}
-  /user/{id}/phonebook
-  /contact/{contactId}
+  /users
+  /users/{id}
+  /users/searchbyname/{name}
+  /users/{id}/phonebook
+  /contacts/{contactId}
 
 POST: 
-  /user
-  /contact
+  /users
+  /contacts
 
 PUT: 
-  /user/{id}
-  /contact/{contactId}
+  /users/{id}
+  /contacts/{contactId}
 
 :DELETE 
-/user/{id}
-/contact/{contactId}
+/users/{id}
+/contacts/{contactId}
 ```
