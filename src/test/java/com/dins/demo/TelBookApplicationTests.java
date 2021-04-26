@@ -1,10 +1,7 @@
 package com.dins.demo;
 
-import com.dins.demo.assemblers.UserAssembler;
 import com.dins.demo.entites.Contact;
-import com.dins.demo.entites.ContactModel;
 import com.dins.demo.entites.User;
-import com.dins.demo.entites.UserModel;
 import com.dins.demo.repos.UserRepository;
 import com.dins.demo.services.ContactService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,17 +10,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
 import java.util.stream.StreamSupport;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,10 +37,8 @@ class TelBookApplicationTests {
     private ContactService contactService;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private UserAssembler userAssembler;
-    @Autowired
-    private PagedResourcesAssembler<User> pagedResourcesAssembler;
+    @Value("{spring.data.rest.default-page-size}")
+    int pageSize;
 
     @AfterEach
     public void resetDb() {
@@ -54,10 +47,10 @@ class TelBookApplicationTests {
 
     @Test
     public void addUser() throws Exception {
-        UserModel user = new UserModel();
+        User user = new User();
         user.setName("qwerty");
         mockMvc.perform(
-                post("/user")
+                post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
         )
@@ -70,7 +63,7 @@ class TelBookApplicationTests {
         int id = createTestUser("tatiana").getId();
         System.out.println(id);
         mockMvc.perform(
-                get("/user/{id}", id))
+                get("/users/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("tatiana"));
     }
@@ -80,7 +73,7 @@ class TelBookApplicationTests {
         int id = createTestUser("katerina").getId();
         System.out.println(id);
         mockMvc.perform(
-                get("/user/{id}", id))
+                get("/users/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("katerina"));
         User toUpd = new User();
@@ -91,7 +84,7 @@ class TelBookApplicationTests {
                         .contentType("application/json")
                         .content("{\"name\":\"Nick\"}"));
         mockMvc.perform(
-                get("/user/{id}", id))
+                get("/users/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Nick"));
     }
@@ -102,8 +95,7 @@ class TelBookApplicationTests {
         User u2 = createTestUser("Svetlana");
         Pageable pageable = PageRequest.of(0, 10);
         Page<User> page = repository.findAll(pageable);
-        PagedModel<UserModel> res = pagedResourcesAssembler.toModel(page, userAssembler);
-        mockMvc.perform(get("/user/all"))
+        mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Tatiana"))
                 .andExpect(jsonPath("$.content[1].name").value("Svetlana"))
@@ -114,7 +106,7 @@ class TelBookApplicationTests {
     public void deleteUserById() throws Exception {
         int id = createTestUser("Samuel").getId();
         Assertions.assertEquals(1, StreamSupport.stream(repository.findAll().spliterator(), false).count());
-        mockMvc.perform(delete("/user/{id}", id))
+        mockMvc.perform(delete("/users/{id}", id))
                 .andExpect(status().isOk());
         Assertions.assertEquals(0, StreamSupport.stream(repository.findAll().spliterator(), false).count());
     }
@@ -124,7 +116,7 @@ class TelBookApplicationTests {
         User user = createTestUser("Igor");
         int id = user.getId();
         Contact contact = createTestContact(user, "TTT", "2389745");
-        mockMvc.perform(get("/user/{id}/phonebook", id))
+        mockMvc.perform(get("/users/{id}/phonebook", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].contactname").value("TTT"));
     }
@@ -133,37 +125,38 @@ class TelBookApplicationTests {
     public void add_and_alter_andDeleteContact() throws Exception {
         User user = createTestUser("Irma");
         int user_id = user.getId();
-        ContactModel contact = new ContactModel();
+        Contact contact = new Contact();
         contact.setContactname("Galina");
         contact.setPhone("89992442616");
-        contact.setUser_id(user_id);
+        contact.setId(user_id);
+        Pageable pageable = PageRequest.of(0, pageSize);
         //add
-        mockMvc.perform(post("/contact").
+        mockMvc.perform(post("/contacts").
                 content(objectMapper.writeValueAsString(contact))
                 .contentType("application/json"))
                 .andExpect(jsonPath("$.contactname").value("Galina"));
         //alter
-        List<Contact> list = contactService.findAllByUser(user);
-        Assert.assertEquals(1, list.size());
-        int contact_id = list.get(0).getId();
-        ContactModel updated = new ContactModel();
+        Page<Contact> list = contactService.findAllByUser(user, pageable);
+        Assert.assertEquals(1, list.getSize());
+        int contact_id = list.getContent().get(0).getId();
+        Contact updated = new Contact();
         updated.setContactname("Annka");
         updated.setPhone(contact.getPhone());
-        updated.setUser_id(user_id);
+        updated.setId(user_id);
         mockMvc.perform(
-                put("/contact/{id}", contact_id)
+                put("/contacts/{id}", contact_id)
                         .content(objectMapper.writeValueAsString(updated))
                         .contentType("application/json"));
         mockMvc.perform(
-                get("/contact/{id}", contact_id))
+                get("/contacts/{id}", contact_id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.contactname").value("Annka"));
         //delete
         mockMvc.perform(
-                delete("/contact/{id}", contact_id))
+                delete("/contacts/{id}", contact_id))
                 .andExpect(status().isNoContent());
-        list = contactService.findAllByUser(user);
-        Assert.assertEquals(0, list.size());
+        list = contactService.findAllByUser(user, pageable);
+        Assert.assertEquals(0, list.getSize());
     }
 
     private User createTestUser(String name) {

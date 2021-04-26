@@ -1,11 +1,8 @@
 package com.dins.demo.web;
 
-import com.dins.demo.assemblers.ContactAssembler;
-import com.dins.demo.assemblers.UserAssembler;
+
 import com.dins.demo.entites.Contact;
-import com.dins.demo.entites.ContactModel;
 import com.dins.demo.entites.User;
-import com.dins.demo.entites.UserModel;
 import com.dins.demo.exceptions.UserNotFoundException;
 import com.dins.demo.repos.UserRepository;
 import com.dins.demo.services.UserService;
@@ -15,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RepositoryRestController
-@RequestMapping(path = "/user", produces = "application/hal+json")
+@RequestMapping(path = "/users", produces = "application/hal+json")
 public class UserController {
 
     @Autowired
@@ -38,65 +33,68 @@ public class UserController {
     private int pageSize;
 
     @Autowired
-    private UserAssembler userModelAssembler;
-
-    @Autowired
-    private ContactAssembler contactAssembler;
-
-    @Autowired
-    private PagedResourcesAssembler<User> pagedResourcesAssembler;
-
-    @Autowired
-    private PagedResourcesAssembler<Contact> contactPagedResourcesAssembler;
-
-    @Autowired
     private UserRepository userRepository;
 
-    @GetMapping(path = "/all", produces = "application/json")
-    public ResponseEntity<PagedModel<UserModel>> getAllUsers(Pageable pageable) {
+    @GetMapping
+    public ResponseEntity<Page<User>> getAllUsers(
+            @PageableDefault Pageable pageable) {
         Page<User> page = userService.getAllUsers(pageable);
         if (page != null) {
-            PagedModel<UserModel> res = pagedResourcesAssembler
-                    .toModel(page, userModelAssembler);
-            return new ResponseEntity<>(res, HttpStatus.OK);
+            for (User u : page.getContent()) {
+                u.add(linkTo(methodOn(UserController.class)
+                        .getUserById(u.getId(), pageable))
+                        .withSelfRel());
+                u.add(linkTo(
+                        methodOn(UserController.class)
+                                .getAllContacts(u.getId(), pageable))
+                        .withRel("phonebook"));
+            }
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
+    public ResponseEntity<User> getUserById(@PathVariable("id") int id,
+                                            @PageableDefault Pageable pageable) {
         User user = userService.getUserById(id);
         if (user != null) {
             user.add(linkTo(methodOn(UserController.class).
-                    getAllContacts(id)).
+                    getAllContacts(id, pageable)).
                     withRel("contacts"));
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(value = "/byname/{name}")
-    public ResponseEntity<PagedModel<UserModel>> getUsersByName(@PathVariable(value = "name") String name,
-                                                                @PageableDefault Pageable pageable) {
+    @GetMapping(value = "/search-by-name/{name}")
+    public ResponseEntity<Page<User>> getUsersByName(@PathVariable(value = "name") String name,
+                                                     @PageableDefault Pageable pageable) {
         Page<User> page = userService.getUsersByMatchesName(name, pageable);
 
         if (page != null) {
-            PagedModel<UserModel> res = pagedResourcesAssembler
-                    .toModel(page, userModelAssembler);
-            return new ResponseEntity<>(res, HttpStatus.OK);
+            for (User u : page.getContent()) {
+                u.add(linkTo(methodOn(UserController.class)
+                        .getUserById(u.getId(), pageable))
+                        .withSelfRel());
+                u.add(linkTo(
+                        methodOn(UserController.class)
+                                .getAllContacts(u.getId(), pageable))
+                        .withRel("phonebook"));
+            }
+            return new ResponseEntity<>(page, HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(path = "/{id}/phonebook", produces = "application/json")
-    public ResponseEntity<PagedModel<ContactModel>> getAllContacts(@PathVariable("id") int id) {
+    @GetMapping(path = "/{id}/phonebook")
+    public ResponseEntity<Page<Contact>> getAllContacts(@PathVariable("id") int id,
+                                                        @PageableDefault Pageable pageable) {
         User user = userService.getUserById(id);
         if (user != null) {
             Page<Contact> page = userService.getAllContacts(user);
             if (page != null) {
-                PagedModel<ContactModel> res = contactPagedResourcesAssembler
-                        .toModel(page, contactAssembler);
-                return new ResponseEntity<>(res, HttpStatus.OK);
+                return new ResponseEntity<>(page, HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -104,8 +102,8 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<User> postUser(@RequestBody UserModel user) {
-        User saved = userService.createUser(userModelAssembler.fromModelToUser(user));
+    public ResponseEntity<User> postUser(@RequestBody User user) {
+        User saved = userService.createUser(user);
         return ResponseEntity.status(201).body(saved);
     }
 
@@ -119,5 +117,5 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity.BodyBuilder deleteUser(@PathVariable("id") int id) {
         return userService.deleteUser(id);
-     }
+    }
 }
